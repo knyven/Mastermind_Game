@@ -1,7 +1,7 @@
 import turtle
 from Point import Point
 from MarbleData import MarbleData
-from ImageData import ImageData
+from Button import Button
 from mastermind_game_files import make_code, game_logic
 
 MARBLE_RADIUS = 20
@@ -14,6 +14,7 @@ X_BUTTON = "xbutton.gif"
 class Marble:
     def __init__(self, position, color = 'white', size = MARBLE_RADIUS):
         self.pen = self.new_pen()
+        self.screen = self.new_screen()
         self.color = color
         self.position = position
         self.visible = False
@@ -33,6 +34,9 @@ class Marble:
 
     def new_pen(self): 
         return turtle.Turtle()
+
+    def new_screen(self):
+        return turtle.Screen()
 
     def set_color(self, color):
         self.color = color
@@ -103,7 +107,26 @@ class Marble:
                 self.set_color(color)
                 self.draw()
 
-
+    def draw_box(self, width, height, x, y, color='black'):
+        RIGHT = 90
+        t = self.new_pen()
+        t.color = color
+        t.speed(0)
+        t.width(5)
+        t.penup()
+        t.hideturtle()
+        t.goto(x, y)
+        t.pendown()
+        t.forward(width)
+        t.right(RIGHT)
+        t.forward(height)
+        t.right(RIGHT)
+        t.forward(width)
+        t.right(RIGHT)
+        t.forward(height)
+        t.right(RIGHT)
+        t.forward(width)
+        t.penup()
 
     def add_lower_marbles(self):
         self.position = self.marble_position
@@ -113,7 +136,8 @@ class Marble:
             self.set_size(MARBLE_RADIUS)
             self.set_color(color)
             self.input_marble_data.append(MarbleData(self.position.x,
-                                                     self.position.y, color))
+                                                     self.position.y,
+                                                     color))
             self.draw()
             self.position.x += 60
 
@@ -124,38 +148,31 @@ class Marble:
             self.position.y -= 30
             self.position.x = -50
             for _ in range(2):
-                self.notification_data.append(MarbleData(self.position.x, self.position.y, color))
+                self.notification_data.append(MarbleData(self.position.x,
+                                                         self.position.y,
+                                                         color))
                 self.set_size(NOTIFICATION)
                 self.set_color(color)
                 self.draw()
                 self.position.x += 20
 
-        """   
-        for y in range(360, -240, -65):
-            for x in range(-50, 0, 25):
-                #for x in range(x + 10, x - 10, -25):
-                self.set_size(NOTIFICATION)
-                self.position = Point(x, y)
-                self.notification_data.append(MarbleData(x, y, color))
-                self.set_color(color)
-                self.draw()
-        """
     def add_button(self, image, x, y):
         # add image to screen
-
-        self.t = turtle.Turtle()
-        self.w = turtle.Screen()
-        self.t.hideturtle()
-        self.t.speed(0)
-        self.t.penup()
-        self.image = image
-        self.w.addshape(image)
-        self.t.goto(x,y)
-        self.button_location.append((ImageData(x, y, image)))
-        self.t.shape(image)
-        self.t.stamp()
+        t = self.new_pen()
+        w = self.new_screen()
+        t.hideturtle()
+        t.speed(0)
+        t.penup()
+        w.addshape(image)
+        t.goto(x,y)
+        self.button_location.append((Button(x, y, image)))
+        t.shape(image)
+        t.stamp()
 
     def draw_play_board(self):
+        self.draw_box(450, 650, -400, 400)
+        self.draw_box(300, 650, 60, 400, 'blue')
+        self.draw_box(760, 150, -400, -260)
         self.add_upper_marbles()
         self.add_notification_marbles()
         self.add_lower_marbles()
@@ -213,7 +230,11 @@ class Marble:
 
 
     def check_button(self):
+
         bulls, cows = game_logic(self.secret_code, self.current_guess)
+
+        if bulls == 4:
+            self.winner()
 
         print(f"The code is: {self.secret_code}")
         print(f"You guessed: {self.current_guess}")
@@ -240,10 +261,10 @@ class Marble:
             self.set_size(NOTIFICATION)
             self.draw()
             column += 1
-
-
         self.current_row += 1
         self.color_input_marbles()
+        if self.current_row > 9:
+            self.loser()
     def reset_button(self):
 
         current_row = self.get_row()
@@ -259,6 +280,17 @@ class Marble:
             self.set_position(x,y)
             self.set_color('white')
             self.draw()
+
+    def winner(self):
+        s = self.new_screen()
+        s.textinput('Winner!!', "You winner you")
+
+
+
+    def loser(self):
+        s = self.new_screen()
+        s.textinput("Secret Code Was", self.secret_code)
+
 
     def color_input_marbles(self):
         # re-color lower input circles
