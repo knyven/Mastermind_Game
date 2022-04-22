@@ -10,6 +10,11 @@ COLORS = ["red", "blue", "green", "yellow", "purple", "black"]
 QUIT_BUTTON = "quit_small.gif"
 CHECK_BUTTON = "checkbutton.gif"
 X_BUTTON = "xbutton.gif"
+WINNER = "winner.gif"
+QUIT_MSG = "quitmsg.gif"
+LOSE = "Lose.gif"
+FILE_ERROR = "file_error.gif"
+LEADER_E = "leaderboard_error.gif"
 
 class Marble:
     def __init__(self, position, color = 'white', size = MARBLE_RADIUS):
@@ -110,7 +115,7 @@ class Marble:
     def draw_box(self, width, height, x, y, color='black'):
         RIGHT = 90
         t = self.new_pen()
-        t.color = color
+        t.color(color)
         t.speed(0)
         t.width(5)
         t.penup()
@@ -215,19 +220,15 @@ class Marble:
         self.click_buttons(x, y)
 
     def click_buttons(self, x, y):
-        print(x, y)
         for button_location in self.button_location:
             if button_location.clicked_in_region_button(x, y):
                 if button_location.image == X_BUTTON:
                     self.reset_button()
                     self.color_input_marbles()
                 elif button_location.image == CHECK_BUTTON:
-                    pass
                     self.check_button()
                 elif button_location.image == QUIT_BUTTON:
-                    pass
-                    #self.quit()
-
+                    self.quit()
 
     def check_button(self):
 
@@ -281,16 +282,18 @@ class Marble:
             self.set_color('white')
             self.draw()
 
+    def quit(self):
+        self.add_button(QUIT_MSG, 0, 0)
+        turtle.exitonclick()
+
     def winner(self):
-        s = self.new_screen()
-        s.textinput('Winner!!', "You winner you")
-
-
+        self.add_button(WINNER, 0, 0)
+        turtle.exitonclick()
 
     def loser(self):
-        s = self.new_screen()
+        self.add_button(LOSE, 0, 0)
         s.textinput("Secret Code Was", self.secret_code)
-
+        turtle.exitonclick()
 
     def color_input_marbles(self):
         # re-color lower input circles

@@ -1,5 +1,4 @@
-CIRCLE_SIZE = 20
-BUTTTON_SIZE = 30
+CIRCLE_SIZE = 15
 
 class MarbleData:
     def __init__(self, x, y, color):
@@ -33,13 +32,6 @@ class MarbleData:
            abs(y - self.y) <= CIRCLE_SIZE * 2:
             return True
         return False
-
-    def clicked_in_regio_button(self, x, y):
-        if abs(x - self.x) <= BUTTTON_SIZE * 2 and \
-           abs(y - self.y) <= BUTTTON_SIZE * 2:
-            return True
-        return False
-
 
     def set_color(self, color):
         self.color = color
