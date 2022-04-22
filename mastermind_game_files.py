@@ -1,18 +1,6 @@
-from turtle import Turtle, Screen
 import random
 
-
 COLORS = ["red", "blue", "green", "yellow", "purple", "black"]
-
-
-
-def setup():
-    global t, w
-    t = Turtle()
-    w = Screen()
-    w.setup(width=900,height=900)
-    t.speed(0)
-    t.hideturtle()
 
 
 def make_code():
@@ -32,22 +20,4 @@ def game_logic(secret_code, guess):
             cow += 1
     return bull, cow
 
-def draw_box(width, height, x, y, color='black'):
-    global t
-    RIGHT = 90
-    t.color(color)
-    t.width(5)
-    t.penup()
-    t.hideturtle()
-    t.goto(x, y)
-    t.pendown()
-    t.forward(width)
-    t.right(RIGHT)
-    t.forward(height)
-    t.right(RIGHT)
-    t.forward(width)
-    t.right(RIGHT)
-    t.forward(height)
-    t.right(RIGHT)
-    t.forward(width)
-    t.penup()
+
