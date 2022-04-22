@@ -3,7 +3,7 @@ import random
 
 
 COLORS = ["red", "blue", "green", "yellow", "purple", "black"]
-
+RIGHT = 90
 
 
 def setup():
@@ -35,7 +35,6 @@ def game_logic(secret_code, guess):
     return bull, cow
 
 def draw_box(width, height, x, y, color='black'):
-    RIGHT = 90
     t.color(color)
     t.width(5)
     # upper play box
