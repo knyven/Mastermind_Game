@@ -3,6 +3,7 @@ from Point import Point
 from MarbleData import MarbleData
 from Button import Button
 from mastermind_game_files import make_code, game_logic
+import datetime
 
 MARBLE_RADIUS = 20
 NOTIFICATION = 8
@@ -14,16 +15,14 @@ WINNER = "winner.gif"
 QUIT_MSG = "quitmsg.gif"
 LOSE = "Lose.gif"
 FILE_ERROR = "file_error.gif"
-LEADER_E = "leaderboard_error.gif"
+LEADER_ERROR = "leaderboard_error.gif"
 
 class Marble:
-    def __init__(self, position, color = 'white', size = MARBLE_RADIUS):
+    def __init__(self, position, color='white', size=MARBLE_RADIUS):
         self.pen = self.new_pen()
         self.screen = self.new_screen()
         self.color = color
         self.position = position
-        self.visible = False
-        self.is_empty = True
         self.pen.hideturtle()
         self.size = size
         self.pen.speed(0)  # set to fastest drawing
@@ -36,6 +35,8 @@ class Marble:
         self.current_row = 0
         self.current_column = 0
         self.secret_code = make_code()
+        self.current_player = self.get_user()
+
 
     def new_pen(self): 
         return turtle.Turtle()
@@ -45,7 +46,6 @@ class Marble:
 
     def set_color(self, color):
         self.color = color
-        self.is_empty = False
 
     def set_size(self, size):
         self.size = size
@@ -75,8 +75,6 @@ class Marble:
 
         self.pen.up()
         self.pen.goto(self.position.x, self.position.y)
-        self.visible = True
-        self.is_empty = False
         self.pen.down()
         self.pen.fillcolor(self.color)
         self.pen.begin_fill()
@@ -87,13 +85,10 @@ class Marble:
         self.erase()
         self.pen.up()
         self.pen.goto(self.position.x, self.position.y)
-        self.visible = True
-        self.is_empty = True
         self.pen.down()
         self.pen.circle(self.size)
         
     def erase(self):
-        self.visible = False
         self.pen.clear()
 
     def clicked_in_region(self, x, y):
@@ -148,18 +143,20 @@ class Marble:
 
     def add_notification_marbles(self):
         color = 'white'
-        self.set_position(-50, 380)
-        for _ in range(20):
-            self.position.y -= 30
-            self.position.x = -50
+        self.set_position(-50, 418)
+        for _ in range(10):
+            self.position.y -= 25
             for _ in range(2):
-                self.notification_data.append(MarbleData(self.position.x,
-                                                         self.position.y,
-                                                         color))
-                self.set_size(NOTIFICATION)
-                self.set_color(color)
-                self.draw()
-                self.position.x += 20
+                self.position.y -= 20
+                self.position.x = -50
+                for _ in range(2):
+                    self.notification_data.append(MarbleData(self.position.x,
+                                                             self.position.y,
+                                                             color))
+                    self.set_size(NOTIFICATION)
+                    self.set_color(color)
+                    self.draw()
+                    self.position.x += 20
 
     def add_button(self, image, x, y):
         # add image to screen
@@ -175,6 +172,8 @@ class Marble:
         t.stamp()
 
     def draw_play_board(self):
+        s = self.new_screen()
+        s.setup(900,900)
         self.draw_box(450, 650, -400, 400)
         self.draw_box(300, 650, 60, 400, 'blue')
         self.draw_box(760, 150, -400, -260)
@@ -184,6 +183,9 @@ class Marble:
         self.add_button(QUIT_BUTTON, 275, -335)
         self.add_button(CHECK_BUTTON, 50, -335)
         self.add_button(X_BUTTON, 125, -335)
+        self.row_pointer(self.current_row)
+        #self.row_pointer()
+
 
 
     def click_circles(self, x, y):
@@ -191,7 +193,8 @@ class Marble:
         self.set_size(MARBLE_RADIUS)
         for input_marble_data in self.input_marble_data:
             if input_marble_data.clicked_in_region(x, y):
-                if input_marble_data.color == 'white' or len(self.current_guess) > 3:
+                if input_marble_data.color == 'white' or \
+                        len(self.current_guess) > 3:
                     break
                 else:
                     color = input_marble_data.get_color()
@@ -216,8 +219,9 @@ class Marble:
                         break
                     else:
                         continue
-        print(self.current_guess)
+        print(self.secret_code)
         self.click_buttons(x, y)
+        #self.row_pointer(self.current_row)
 
     def click_buttons(self, x, y):
         for button_location in self.button_location:
@@ -226,27 +230,22 @@ class Marble:
                     self.reset_button()
                     self.color_input_marbles()
                 elif button_location.image == CHECK_BUTTON:
-                    self.check_button()
+                    if len(self.current_guess) != 4:
+                        return
+                    else:
+                        self.check_button()
                 elif button_location.image == QUIT_BUTTON:
                     self.quit()
 
     def check_button(self):
-
         bulls, cows = game_logic(self.secret_code, self.current_guess)
-
         if bulls == 4:
             self.winner()
-
-        print(f"The code is: {self.secret_code}")
-        print(f"You guessed: {self.current_guess}")
-        print(f"Bulls: {bulls}, cows:  {cows}")
-
         column = 0
         current_row = self.get_row()
         notification_row = [self.notification_data[n:n + 4] for n in
                     range(0, len(self.marble_data), 4)]
         notification_row = notification_row[current_row]
-
         for bull in range(bulls):
             self.set_position(notification_row[column].get_position_x(),
                               notification_row[column].get_position_y())
@@ -254,7 +253,6 @@ class Marble:
             self.set_size(NOTIFICATION)
             self.draw()
             column += 1
-
         for cow in range(cows):
             self.set_position(notification_row[column].get_position_x(),
                               notification_row[column].get_position_y())
@@ -263,9 +261,12 @@ class Marble:
             self.draw()
             column += 1
         self.current_row += 1
+        #self.row_delete(self.current_row)
+        self.row_pointer(self.current_row)
         self.color_input_marbles()
         if self.current_row > 9:
             self.loser()
+
     def reset_button(self):
 
         current_row = self.get_row()
@@ -287,11 +288,13 @@ class Marble:
         turtle.exitonclick()
 
     def winner(self):
+        self.add_score()
         self.add_button(WINNER, 0, 0)
         turtle.exitonclick()
 
     def loser(self):
         self.add_button(LOSE, 0, 0)
+        s = self.new_screen()
         s.textinput("Secret Code Was", self.secret_code)
         turtle.exitonclick()
 
@@ -310,3 +313,73 @@ class Marble:
         # delete current guesses
         self.current_guess.clear()
         self.current_column = 0
+
+    def row_pointer(self, row):
+
+        if row > 9:
+            return
+        turtle.hideturtle()
+        turtle.shape('classic')
+        turtle.color('red')
+        turtle.penup()
+        turtle.goto(-340, 370 - row * 65)
+        turtle.showturtle()
+        turtle.shapesize(2, 2, 2)
+
+    def get_user(self):
+        s = self.new_screen()
+        return s.textinput("Master-Mind Game",
+                           "Please enter your name:").strip().capitalize()
+
+    def write_errors(self, error):
+
+        try:
+            with open('error_log.txt', 'a+') as f:
+                date_time = datetime.datetime.now()
+                f.write(str(date_time) + ' : ' + str(error) + '\n')
+
+        except IOError as error:
+
+            print(error)
+
+    def add_score(self):
+        try:
+            with open('leaderboard1.txt', 'a') as w:
+                w.write((str(self.current_row + 1)) +
+                        " : " + self.current_player.strip().capitalize() + '\n')
+
+        except IOError as error:
+            self.write_errors(error)
+            self.leader_board_error()
+            print(error)
+
+
+    def write_score(self):
+
+        try:
+            with open('leaderboard1.txt', 'r') as r:
+                leaders = [line.strip().split(':') for line in r]
+                leaders.sort()
+                t = self.new_pen()
+                t.hideturtle()
+                t.speed(0)
+                t.penup()
+                t.goto(75, 300)
+
+                for leader in leaders:
+                    leader = ":".join(leader)
+                    t.write(leader, font=('Verdana', 20, "normal"))
+                    t.right(90)
+                    t.forward(50)
+                    t.left(90)
+
+        except IOError as error:
+            self.write_errors(error)
+            print(error)
+
+    def leader_board_error(self):
+        self.add_button(LEADER_ERROR, 0, 0)
+
+    def file_error(self):
+        self.add_button(FILE_ERROR, 0, 0)
+        self.erase()
