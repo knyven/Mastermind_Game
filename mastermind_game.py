@@ -1,7 +1,8 @@
 """
 Veniamin Knyazev
 CS 5001 Spring 2022
-Final Project- Marble Class
+Final Project- Mastermind Game 
+This is the main file for the mastermind game.
 """
 from Marble import Marble
 from Point import Point
